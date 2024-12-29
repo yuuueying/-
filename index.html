@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>谢小破站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+
+        .post-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        .options-group {
+            margin: 15px 0;
+        }
+
+        .options-group label {
+            display: inline-block;
+            margin-right: 15px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .post {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #166fe5;
+        }
+    </style>
+</head>
+<body>
+    <div class="post-form">
+        <input type="text" id="authorName" placeholder="输入你的名字">
+
+        <div class="options-group">
+            <p>选择头像：</p>
+            <label>
+                <input type="radio" name="avatar" value="0" checked>
+                😊 微笑
+            </label>
+            <label>
+                <input type="radio" name="avatar" value="1">
+                🐱 可爱小猫
+            </label>
+            <label>
+                <input type="radio" name="avatar" value="2">
+                💩 xxy专用
+            </label>
+            <label>
+                <input type="radio" name="avatar" value="3">
+                🐼 大宝贝
+            </label>
+            <label>
+                <input type="radio" name="avatar" value="4">
+                🐶 笨蛋小狗
+            </label>
+        </div>
+
+        <textarea id="content" placeholder="分享你的心情..."></textarea>
+
+        <div class="options-group">
+            <p>选择心情：</p>
+            <label>
+                <input type="radio" name="mood" value="0" checked>
+                😄 开心
+            </label>
+            <label>
+                <input type="radio" name="mood" value="1">
+                😌 放松
+            </label>
+            <label>
+                <input type="radio" name="mood" value="2">
+                😢 难过
+            </label>
+            <label>
+                <input type="radio" name="mood" value="3" checked>
+                💩 拉屎
+            </label>
+            <label>
+                <input type="radio" name="mood" value="4" checked>
+                😋 好吃
+            </label>
+            <label>
+                <input type="radio" name="mood" value="5" checked>
+                😇 死啦
+            </label>
+            <label>
+                <input type="radio" name="mood" value="6" checked>
+                🥺 感动
+            </label>
+            <label>
+                <input type="radio" name="mood" value="7" checked>
+                🤫 保密
+            </label>
+            <label>
+                <input type="radio" name="mood" value="8" checked>
+                🙄 无语
+            </label>
+            <label>
+                <input type="radio" name="mood" value="9" checked>
+                🤤 做梦
+            </label>
+            <label>
+                <input type="radio" name="mood" value="10" checked>
+                😡 滚
+            </label>
+        </div>
+
+        <button id="postButton">发布</button>
+    </div>
+
+    <div id="postsContainer"></div>
+
+    <script>
+        // 先清除localStorage中的旧数据
+        localStorage.clear();
+
+        // 配置
+        const avatars = ['😊', '🐱', '🐼'];
+        const moods = [
+            {emoji: '😄', name: '开心', color: '#FFD700'},
+            {emoji: '😌', name: '放松', color: '#98FB98'},
+            {emoji: '😢', name: '难过', color: '#87CEEB'}
+        ];
+
+        // 初始化空的帖子数组
+        let posts = [];
+
+        // 显示所有帖子
+        function displayPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = posts.map(post => {
+                const mood = moods[parseInt(post.mood)];
+                return `
+                    <div class="post">
+                        <div class="post-header">
+                            <span style="font-size: 24px;">${avatars[parseInt(post.avatar)]}</span>
+                            <strong>${post.author}</strong>
+                            <span style="background: ${mood.color}; padding: 3px 8px; border-radius: 12px;">
+                                ${mood.emoji} ${mood.name}
+                            </span>
+                        </div>
+                        <div>${post.content}</div>
+                        <div style="color: #666; font-size: 12px; margin-top: 8px;">
+                            ${post.time}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 监听发布按钮点击事件
+        document.getElementById('postButton').addEventListener('click', function() {
+            const authorName = document.getElementById('authorName').value;
+            const content = document.getElementById('content').value;
+            const avatar = document.querySelector('input[name="avatar"]:checked').value;
+            const mood = document.querySelector('input[name="mood"]:checked').value;
+
+            if (!authorName || !content) {
+                alert('请填写名字和内容！');
+                return;
+            }
+
+            const post = {
+                author: authorName,
+                content: content,
+                avatar: avatar,
+                mood: mood,
+                time: new Date().toLocaleString()
+            };
+
+            posts.unshift(post);
+            try {
+                localStorage.setItem('posts', JSON.stringify(posts));
+            } catch (e) {
+                console.error('保存到localStorage失败:', e);
+            }
+            displayPosts();
+
+            // 清空输入
+            document.getElementById('authorName').value = '';
+            document.getElementById('content').value = '';
+        });
+
+        // 页面加载时尝试恢复已存储的帖子
+        try {
+            const savedPosts = localStorage.getItem('posts');
+            if (savedPosts) {
+                posts = JSON.parse(savedPosts);
+                displayPosts();
+            }
+        } catch (e) {
+            console.error('读取localStorage失败:', e);
+        }
+    </script>
+</body>
+</html>
